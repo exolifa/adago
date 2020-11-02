@@ -1,0 +1,42 @@
+<!--carform.html-->
+
+<!--Embed the header.html template at this location-->
+{{ template "header.html" .}}
+<form  action="/formcars" method="POST">
+    <div align="right">   
+        Vendor:<input type="text" name="vensel">Model: <input type="text" name="modsel"> Color: <input type="text" name="colsel"><input type="submit" name="oper" value="SELECT">
+    </div><hr>
+    <div align="center">
+    <table style="width: 100%">
+        <colgroup>
+            <col span="1" style="width: 1%;">
+            <col span="1" style="width: 30%;">
+            <col span="1" style="width: 45%;">
+            <col span="1" style="width: 15%;">
+            <col span="1" style="width: 9%;">
+         </colgroup>  
+      <tr>
+        <th>Référence</th>  
+        <th>Vendor</th>
+        <th>Model</th>
+        <th>Color</th>
+        <th>Select</th>
+      </tr>
+      {{range .payload }}
+      <tr>
+        <td>{{.Isn}}</td> 
+        <td>{{.Vendor}}</td>
+        <td>{{.Model}}</td>
+        <td>{{.Color}}</td>
+        <td><Center><input type="radio" name="selection" value="{{.Isn}}-{{.Vendor}}-{{.Model}}-{{.Color}}"></Center></td>
+      </tr>
+      {{end}}
+    </table>
+    <hr>
+    </div>
+    <div align="left">
+    <input type="submit" name="oper" value="ADD"><input type="submit" name="oper" value="DELETE">
+    </div>
+</form>
+<!--Embed the footer.html template at this location-->
+{{ template "footer.html" .}}

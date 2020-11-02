@@ -1,0 +1,7 @@
+{
+    "db_to_use": "Production",
+    "switcher_config": "c:\\Users\\daniel\\sage\\adago\\dbproc\\switcherconf.json",
+	"maps_file": "dbproc/vehicules.json",
+	"templates": "c:\\Users\\daniel\\sage\\adago\\templates\\*",
+    "port": "8999"
+}

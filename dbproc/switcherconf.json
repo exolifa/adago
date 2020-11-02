@@ -1,0 +1,8 @@
+{
+    "Production":
+    {
+        "Numero" : 12 ,
+	    "Url": "localhost:60001",
+	    "Fnr": 4
+    }
+}

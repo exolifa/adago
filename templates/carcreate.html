@@ -1,0 +1,17 @@
+<!--carcreate.html-->
+
+<!--Embed the header.html template at this location-->
+{{ template "header.html" .}}
+
+<Form method="POST" action="/formcars">
+<center>
+    <label>Vendeur:</label><input name="vencr" type="text">
+    <label>Modèle :</label><input name="modcr" type="text">
+    <label>Couleur:</label><input name="colcr" type="text">
+</center>
+<br><br>
+<input type="submit" name="oper" value="CREATE">
+
+</Form>
+<!--Embed the footer.html template at this location-->
+{{ template "footer.html" .}}

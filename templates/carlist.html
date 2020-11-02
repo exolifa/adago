@@ -1,0 +1,21 @@
+<!--carlist.html-->
+
+<!--Embed the header.html template at this location-->
+{{ template "header.html" .}}
+
+<table>
+    <tr>
+        <th>Vendor</th>
+        <th>Model</th>
+        <th>Color</th>
+    </tr>
+{{range .payload }}
+    <tr>
+        <td>{{.Vendor}}</td>
+        <td>{{.Model}}</td>
+        <td>{{.Color}}</td>
+    </tr>
+ {{end}}
+</table>
+<!--Embed the footer.html template at this location-->
+{{ template "footer.html" .}}
