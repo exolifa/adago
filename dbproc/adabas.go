@@ -26,6 +26,14 @@ type Carrec struct {
 	Color  string
 }
 
+//CarRecU contain update record
+type CarRecU struct {
+	Isn    adatypes.Isn
+	Vendor string
+	Model  string
+	Color  string
+}
+
 // CarList is the structure to get the list of cars
 type CarList struct {
 	Vehicules []Carinfo
@@ -34,7 +42,7 @@ type CarList struct {
 // UpdCar is the structure to return result of create
 type UpdCar struct {
 	Opcode   bool
-	vehicule Carinfo
+	Vehicule Carinfo
 }
 
 // Switchprop contains a database switching proposal
@@ -258,9 +266,9 @@ func AddCar(Myconn *adabas.Connection, vendeur string, modele string, couleur st
 		fmt.Printf("store enreg error=%v\n", sterr)
 	}
 	var result UpdCar
-	result.vehicule.Vendor = vendeur
-	result.vehicule.Color = couleur
-	result.vehicule.Model = modele
+	result.Vehicule.Vendor = vendeur
+	result.Vehicule.Color = couleur
+	result.Vehicule.Model = modele
 	result.Opcode = true
 	transerr := storeRequest.EndTransaction()
 	if transerr != nil {
@@ -284,6 +292,36 @@ func DelCar(Myconn *adabas.Connection, carisn uint64) UpdCar {
 	var result UpdCar
 	result.Opcode = true
 	transerr := deleteRequest.EndTransaction()
+	if transerr != nil {
+		result.Opcode = false
+		fmt.Printf("End transaction error=%v\n", transerr)
+	}
+	return result
+}
+
+//UpdateCar  enables update
+func UpdateCar(Myconn *adabas.Connection, isn uint64, vendeur string, modele string, couleur string) UpdCar {
+	// creating Store Request with MAP
+	storeRequest, cerr := Myconn.CreateMapStoreRequest("VehicleMap")
+	if cerr != nil {
+		fmt.Printf("CreateMapStoreRequest() error=%v\n", cerr)
+	}
+	// Assigning query's fields
+	err := storeRequest.StoreFields("Isn,Vendor,Model,Color")
+	if err != nil {
+		fmt.Printf("QueryFields() error=%v\n", err)
+	}
+	enreg := &CarRecU{Isn: adatypes.Isn(isn), Vendor: vendeur, Model: modele, Color: couleur}
+	sterr := storeRequest.StoreData(enreg)
+	if sterr != nil {
+		fmt.Printf("store enreg error=%v\n", sterr)
+	}
+	var result UpdCar
+	result.Vehicule.Vendor = vendeur
+	result.Vehicule.Color = couleur
+	result.Vehicule.Model = modele
+	result.Opcode = true
+	transerr := storeRequest.EndTransaction()
 	if transerr != nil {
 		result.Opcode = false
 		fmt.Printf("End transaction error=%v\n", transerr)

@@ -94,6 +94,21 @@ func FormCars(c *gin.Context) {
 		render(c, gin.H{
 			"title": "Add New car",
 		}, "carcreate.html")
+	case "UPD":
+		cible := c.PostForm("selection")
+		s := strings.Split(cible, "-")
+		isnupd, venupd, modupd, colupd := s[0], s[1], s[2], s[3]
+		i64, _ := strconv.ParseInt(isnupd, 10, 64)
+		var carupd []dbproc.Carinfo
+		var voiture dbproc.Carinfo
+		voiture.Isn = uint64(i64)
+		voiture.Vendor = venupd
+		voiture.Color = colupd
+		voiture.Model = modupd
+		carupd = append(carupd, voiture)
+		render(c, gin.H{
+			"title":   "Update car",
+			"payload": carupd}, "carupd.html")
 
 	case "DELETE":
 		cible := c.PostForm("selection")
@@ -117,6 +132,19 @@ func FormCars(c *gin.Context) {
 		render(c, gin.H{
 			"title":   "List of cars",
 			"payload": mycarlist.Vehicules}, "carform.html")
+	case "UPDATE":
+		venup := c.PostForm("vencr")
+		colup := c.PostForm("colcr")
+		modup := c.PostForm("modcr")
+		isnup := c.PostForm("isn")
+		i64, _ := strconv.ParseInt(isnup, 10, 64)
+		_ = dbproc.UpdateCar(Myconn, uint64(i64), venup, modup, colup)
+		mycarlist := dbproc.CarsSearch(Myconn, venup, modup, colup, 0)
+		fmt.Printf("data received from adabas:%v\n", mycarlist)
+		render(c, gin.H{
+			"title":   "List of cars",
+			"payload": mycarlist.Vehicules}, "carform.html")
+
 	case "SELECT":
 		vensel := c.PostForm("vensel")
 		modsel := c.PostForm("modsel")

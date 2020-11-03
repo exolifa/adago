@@ -1,0 +1,21 @@
+<!--carupd.html-->
+
+<!--Embed the header.html template at this location-->
+{{ template "header.html" .}}
+{{range .payload }}
+<Form method="POST" action="/formcars">
+<div align="left">
+    <label ><B>Référence:  {{.Isn}}</B></label><input type= "hidden" name="isn" value="{{.Isn}}" ><br><br>
+</div>
+<div align="Center">
+    <label>Vendeur:</label><input name="vencr" type="text" value="{{.Vendor}}"><br><br>
+    <label>Modèle :</label><input name="modcr" type="text" value="{{.Model}}"><br><br>
+    <label>Couleur:</label><input name="colcr" type="text" value="{{.Color}}">
+<br><br>
+<input type="submit" name="oper" value="UPDATE">
+</div>
+</Form>
+{{end}}
+
+<!--Embed the footer.html template at this location-->
+{{ template "footer.html" .}}
