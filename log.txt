@@ -1,0 +1,72 @@
+resume de l'init
+=================
+le parametre reçu:c:\Users\daniel\sage\adago\adagoparam.json
+le fichier param :{
+    "db_to_use": "Production",
+    "switcher_config": "c:\\Users\\daniel\\sage\\adago\\dbproc\\switcherconf.json",
+	"maps_file": "dbproc/vehicules.json",
+	"templates": "c:\\Users\\daniel\\sage\\adago\\templates\\*",
+    "port": "8999"
+}
+le nom du fichier switch:c:\Users\daniel\sage\adago\dbproc\switcherconf.json
+le fichier switching:{
+    "Production":
+    {
+        "Numero" : 12 ,
+	    "Url": "localhost:60001",
+	    "Fnr": 4
+    }
+}
+configuring Dburl to 12(adatcp://localhost:60001)
+configuring Dbconn to 12(adatcp://localhost:60001),4
+Opening connection to :acj;map;config=[12(adatcp://localhost:60001),4]
+loading map from dbproc/vehicules.json into :12(adatcp://localhost:60001)
+Loading ....dbproc/vehicules.json
+ADDING MAP TO GLOBAL REPO
+	ADDING FNR 4 AS GLOBAL REPO
+	STORE MAP TO REPO
+store map error=ADAGE62000: Unique descriptor already present (rsp=98,subrsp=0,dbid=12(adatcp://localhost:60001),file=4)
+ADDING MAP TO CACHE
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] Loaded HTML Templates (9): 
+	- carcreate.html
+	- carform.html
+	- carlist.html
+	- footer.html
+	- header.html
+	- menu.html
+	- 
+	- index.html
+	- carupd.html
+
+[GIN-debug] GET    /                         --> adago.net/adago/processors.Carsliste (3 handlers)
+[GIN-debug] GET    /carlist                  --> adago.net/adago/processors.Carsliste (3 handlers)
+[GIN-debug] GET    /caradd/:vendeur/:modele/:couleur --> adago.net/adago/processors.CarAdd (3 handlers)
+[GIN-debug] POST   /formcars                 --> adago.net/adago/processors.FormCars (3 handlers)
+[GIN-debug] Listening and serving HTTP on :8999
+[GIN] 2020/11/03 - 17:27:56 | 200 |   10.1840775s |             ::1 | GET      "/"
+in formcars with action=SELECT
+searching for Vendor: FORD Model  and Color:COPACABANA
+data received from adabas:{[{72 FORD ESCORT COPACABANA} {774 FORD SIERRA COPACABANA}]}
+[GIN] 2020/11/03 - 17:28:17 | 200 |   12.1477849s |             ::1 | POST     "/formcars"
+in formcars with action=UPD
+[GIN] 2020/11/03 - 17:28:32 | 200 |   10.0242733s |             ::1 | POST     "/formcars"
+in formcars with action=UPDATE
+enreg:ISN=774 quantity=0
+ CD=""
+ Vendor="FORD"
+ Model="SIERRA"
+ Color="COPACABANA"
+
+enreg modified:ISN=774 quantity=0
+ CD=""
+ Vendor="FORD"
+ Model="SYERRA"
+ Color="COPACABANA"
+
+[GIN] 2020/11/03 - 17:28:49 | 500 |   11.0895447s |             ::1 | POST     "/formcars"

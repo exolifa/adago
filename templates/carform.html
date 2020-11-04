@@ -2,6 +2,11 @@
 
 <!--Embed the header.html template at this location-->
 {{ template "header.html" .}}
+{{ if .message }}
+<div class="error">
+Error message received:  {{ .messages }}
+</div>
+{{ end }}
 <form  action="/formcars" method="POST">
     <div align="right">   
         Vendor:<input type="text" name="vensel">Model: <input type="text" name="modsel"> Color: <input type="text" name="colsel"><input type="submit" name="oper" value="SELECT">
@@ -22,7 +27,7 @@
         <th>Color</th>
         <th>Select</th>
       </tr>
-      {{range .payload }}
+      {{range .payload.Vehicules }}
       <tr>
         <td>{{.Isn}}</td> 
         <td>{{.Vendor}}</td>

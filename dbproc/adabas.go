@@ -26,23 +26,10 @@ type Carrec struct {
 	Color  string
 }
 
-//CarRecU contain update record
-type CarRecU struct {
-	Isn    adatypes.Isn
-	Vendor string
-	Model  string
-	Color  string
-}
-
 // CarList is the structure to get the list of cars
 type CarList struct {
 	Vehicules []Carinfo
-}
-
-// UpdCar is the structure to return result of create
-type UpdCar struct {
-	Opcode   bool
-	Vehicule Carinfo
+	Message   string
 }
 
 // Switchprop contains a database switching proposal
@@ -70,7 +57,7 @@ type Config struct {
 // Conf contains parameters for all modules
 var Conf Config
 
-// GetConfig allows other module to get access to parameters in config file
+// GetConfig allows other modules to get access to parameters in config file
 func GetConfig(item string) string {
 	switch item {
 	case "dbtouse":
@@ -91,6 +78,7 @@ func GetConfig(item string) string {
 	return "unknown request"
 }
 
+// init load the json file for switching databases
 func init() {
 	conffyle := os.Args[1]
 	fic, ficerr := ioutil.ReadFile(conffyle)
@@ -108,24 +96,27 @@ func init() {
 	fmt.Printf("le fichier switching:%v\n", string(fichier))
 }
 
+// result2struct transforms adabas response into array of struct to enable easy publishing in HTML templates
 func result2struct(r *adabas.Response) []Carinfo {
 	var cl []Carinfo
-	for _, v := range r.Values {
-		isn := v.Isn
-		ven, _ := v.SearchValue("Vendor")
-		mod, _ := v.SearchValue("Model")
-		col, _ := v.SearchValue("Color")
-		var voiture Carinfo
-		voiture.Isn = uint64(isn)
-		voiture.Vendor = ven.String()
-		voiture.Model = mod.String()
-		voiture.Color = col.String()
-		cl = append(cl, voiture)
+	if r.NrRecords() > 0 {
+		for _, v := range r.Values {
+			isn := v.Isn
+			ven, _ := v.SearchValue("Vendor")
+			mod, _ := v.SearchValue("Model")
+			col, _ := v.SearchValue("Color")
+			var voiture Carinfo
+			voiture.Isn = uint64(isn)
+			voiture.Vendor = ven.String()
+			voiture.Model = mod.String()
+			voiture.Color = col.String()
+			cl = append(cl, voiture)
+		}
 	}
 	return cl
 }
 
-// Adaswitch create a adabas connection string based on received value
+// Adaswitch create a adabas connection string based on received value(s)
 func Adaswitch(i interface{}) {
 	switch v := i.(type) {
 	case map[string]string:
@@ -186,7 +177,7 @@ func Adabasinit() *adabas.Connection {
 	return adaConnect
 }
 
-// Carslist return the list of cars up to number given by limite
+// Carslist return the list of cars up to number given by limite - zero means all
 func Carslist(Myconn *adabas.Connection, limite uint64) CarList {
 	// creating Read Request with MAP
 	readRequest, cerr := Myconn.CreateMapReadRequest("VehicleMap")
@@ -239,6 +230,7 @@ func CarsSearch(Myconn *adabas.Connection, vv string, mv string, cv string, limi
 	if cv != "" {
 		cherche = cherche + "Color=" + cv
 	}
+	fmt.Printf("car search with :%v\n", cherche)
 	result, err := readRequest.ReadLogicalWith(cherche)
 	if err != nil {
 		fmt.Printf("ReadLogicalWith() error=%v\n", err)
@@ -249,82 +241,84 @@ func CarsSearch(Myconn *adabas.Connection, vv string, mv string, cv string, limi
 }
 
 //AddCar tries to create a car record in the file
-func AddCar(Myconn *adabas.Connection, vendeur string, modele string, couleur string) UpdCar {
+func AddCar(Myconn *adabas.Connection, vendeur string, modele string, couleur string) string {
 	// creating Store Request with MAP
 	storeRequest, cerr := Myconn.CreateMapStoreRequest("VehicleMap")
 	if cerr != nil {
-		fmt.Printf("CreateMapStoreRequest() error=%v\n", cerr)
+		return cerr.Error()
 	}
 	// Assigning query's fields
 	err := storeRequest.StoreFields("Vendor,Model,Color")
 	if err != nil {
-		fmt.Printf("QueryFields() error=%v\n", err)
+		return err.Error()
 	}
 	enreg := &Carrec{Vendor: vendeur, Model: modele, Color: couleur}
 	sterr := storeRequest.StoreData(enreg)
 	if sterr != nil {
-		fmt.Printf("store enreg error=%v\n", sterr)
+		return sterr.Error()
 	}
-	var result UpdCar
-	result.Vehicule.Vendor = vendeur
-	result.Vehicule.Color = couleur
-	result.Vehicule.Model = modele
-	result.Opcode = true
 	transerr := storeRequest.EndTransaction()
 	if transerr != nil {
-		result.Opcode = false
-		fmt.Printf("End transaction error=%v\n", transerr)
+		return transerr.Error()
 	}
-	return result
+	return ""
 }
 
 // DelCar enables user to delete a car
-func DelCar(Myconn *adabas.Connection, carisn uint64) UpdCar {
+func DelCar(Myconn *adabas.Connection, carisn uint64) string {
 	deleteRequest, cerr := Myconn.CreateMapDeleteRequest("VehicleMap")
 	if cerr != nil {
-		fmt.Printf("CreateMapDeleteRequest() error=%v\n", cerr)
+		return cerr.Error()
 	}
 
 	sterr := deleteRequest.Delete(adatypes.Isn(carisn))
 	if sterr != nil {
-		fmt.Printf("store enreg error=%v\n", sterr)
+		return sterr.Error()
 	}
-	var result UpdCar
-	result.Opcode = true
 	transerr := deleteRequest.EndTransaction()
 	if transerr != nil {
-		result.Opcode = false
-		fmt.Printf("End transaction error=%v\n", transerr)
+		return transerr.Error()
 	}
-	return result
+	return ""
 }
 
 //UpdateCar  enables update
-func UpdateCar(Myconn *adabas.Connection, isn uint64, vendeur string, modele string, couleur string) UpdCar {
-	// creating Store Request with MAP
-	storeRequest, cerr := Myconn.CreateMapStoreRequest("VehicleMap")
+func UpdateCar(Myconn *adabas.Connection, isn uint64, vendeur string, modele string, couleur string) string {
+	// creating Read Request with MAP
+	readRequest, cerr := Myconn.CreateMapReadRequest("VehicleMap")
 	if cerr != nil {
-		fmt.Printf("CreateMapStoreRequest() error=%v\n", cerr)
+		return cerr.Error()
 	}
 	// Assigning query's fields
-	err := storeRequest.StoreFields("Isn,Vendor,Model,Color")
+	readRequest.SetHoldRecords(adatypes.HoldWait)
+	err := readRequest.QueryFields("Vendor,Model,Color")
 	if err != nil {
-		fmt.Printf("QueryFields() error=%v\n", err)
+		return err.Error()
+	} // Performing the query ordered by NAME
+	readresult, err := readRequest.ReadISN(adatypes.Isn(isn))
+	if err != nil {
+		return err.Error()
 	}
-	enreg := &CarRecU{Isn: adatypes.Isn(isn), Vendor: vendeur, Model: modele, Color: couleur}
-	sterr := storeRequest.StoreData(enreg)
-	if sterr != nil {
-		fmt.Printf("store enreg error=%v\n", sterr)
+	enreg := readresult.Values[0]
+	fmt.Printf("enreg:%v\n", enreg)
+	enreg.SetValue("Vendor", vendeur)
+	enreg.SetValue("Model", modele)
+	enreg.SetValue("Color", couleur)
+	fmt.Printf("enreg modified:%v\n", enreg)
+	//  the mode of creation of the storeRequest must be the same than the mode of creation of the previous ReadRequest
+	storeRequest, cerr := Myconn.CreateMapStoreRequest("VehicleMap")
+	if cerr != nil {
+		return cerr.Error()
 	}
-	var result UpdCar
-	result.Vehicule.Vendor = vendeur
-	result.Vehicule.Color = couleur
-	result.Vehicule.Model = modele
-	result.Opcode = true
-	transerr := storeRequest.EndTransaction()
-	if transerr != nil {
-		result.Opcode = false
-		fmt.Printf("End transaction error=%v\n", transerr)
+	storeRequest.StoreFields("Vendor,Model,Color")
+	err = storeRequest.Update(enreg)
+	if err != nil {
+		return err.Error()
 	}
-	return result
+	err = storeRequest.EndTransaction()
+	if err != nil {
+		return err.Error()
+	}
+	Myconn.Release()
+	return ""
 }

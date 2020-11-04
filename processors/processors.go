@@ -15,23 +15,6 @@ import (
 // Myconn est le contenu de la connexion ADABAS
 var Myconn = dbproc.Adabasinit()
 
-// Showmenu send back the index.html page
-func Showmenu(c *gin.Context) {
-	fmt.Printf("Request to send menu")
-	// Call the HTML method of the Context to render a template
-	c.HTML(
-		// Set the HTTP status to 200 (OK)
-		http.StatusOK,
-		// Use the index.html template
-		"carform.html",
-		// Pass the data that the page uses (in this case, 'title')
-		gin.H{
-			"title": "Home Page",
-		},
-	)
-
-}
-
 // Render to handle all types of request (html ,json,xml
 
 func render(c *gin.Context, data gin.H, templateName string) {
@@ -59,25 +42,9 @@ func Carsliste(c *gin.Context) {
 	mycarlist := dbproc.Carslist(Myconn, 0)
 	render(c, gin.H{
 		"title":   "List of cars",
-		"payload": mycarlist.Vehicules}, "carform.html")
+		"payload": mycarlist}, "carform.html")
 
 }
-
-// CarsParam return full list of cars sorted by vendor
-/*func CarsParam(c *gin.Context) {
-	defer Myconn.Close()
-	err := Myconn.Open()
-	if err != nil {
-		fmt.Printf("Open() error=%v\n", err)
-		return
-	}
-	clef := c.Param("clef")
-	valeur := c.Param("valeur")
-	mycarlist := dbproc.CarsSearch(Myconn, clef, valeur, "", "", 0)
-	render(c, gin.H{
-		"title":   "List of cars",
-		"payload": mycarlist.Vehicules}, "carform.html")
-}*/
 
 // FormCars return full list of cars sorted by vendor
 func FormCars(c *gin.Context) {
@@ -115,35 +82,38 @@ func FormCars(c *gin.Context) {
 		s := strings.Split(cible, "-")
 		isndel, vendel := s[0], s[1]
 		i64, _ := strconv.ParseInt(isndel, 10, 64)
-		_ = dbproc.DelCar(Myconn, uint64(i64))
+		msg := dbproc.DelCar(Myconn, uint64(i64))
 		mycarlist := dbproc.CarsSearch(Myconn, vendel, "", "", 0)
+		mycarlist.Message = msg
 		fmt.Printf("data received from adabas:%v\n", mycarlist)
 		render(c, gin.H{
 			"title":   "List of cars",
-			"payload": mycarlist.Vehicules}, "carform.html")
+			"payload": mycarlist}, "carform.html")
 
 	case "CREATE":
 		vencr := c.PostForm("vencr")
 		colcr := c.PostForm("colcr")
 		modcr := c.PostForm("modcr")
-		_ = dbproc.AddCar(Myconn, vencr, modcr, colcr)
+		msg := dbproc.AddCar(Myconn, vencr, modcr, colcr)
 		mycarlist := dbproc.CarsSearch(Myconn, vencr, "", "", 0)
+		mycarlist.Message = msg
 		fmt.Printf("data received from adabas:%v\n", mycarlist)
 		render(c, gin.H{
 			"title":   "List of cars",
-			"payload": mycarlist.Vehicules}, "carform.html")
+			"payload": mycarlist}, "carform.html")
 	case "UPDATE":
 		venup := c.PostForm("vencr")
 		colup := c.PostForm("colcr")
 		modup := c.PostForm("modcr")
 		isnup := c.PostForm("isn")
 		i64, _ := strconv.ParseInt(isnup, 10, 64)
-		_ = dbproc.UpdateCar(Myconn, uint64(i64), venup, modup, colup)
+		msg := dbproc.UpdateCar(Myconn, uint64(i64), venup, modup, colup)
 		mycarlist := dbproc.CarsSearch(Myconn, venup, modup, colup, 0)
+		mycarlist.Message = msg
 		fmt.Printf("data received from adabas:%v\n", mycarlist)
 		render(c, gin.H{
 			"title":   "List of cars",
-			"payload": mycarlist.Vehicules}, "carform.html")
+			"payload": mycarlist}, "carform.html")
 
 	case "SELECT":
 		vensel := c.PostForm("vensel")
@@ -154,30 +124,12 @@ func FormCars(c *gin.Context) {
 		fmt.Printf("data received from adabas:%v\n", mycarlist)
 		render(c, gin.H{
 			"title":   "List of cars",
-			"payload": mycarlist.Vehicules}, "carform.html")
+			"payload": mycarlist}, "carform.html")
 	default:
 		mycarlist := dbproc.Carslist(Myconn, 0)
 		render(c, gin.H{
 			"title":   "List of cars",
-			"payload": mycarlist.Vehicules}, "carform.html")
+			"payload": mycarlist}, "carform.html")
 
 	}
-}
-
-// CarAdd create a new car in the dabaser
-func CarAdd(c *gin.Context) {
-	defer Myconn.Close()
-	err := Myconn.Open()
-	if err != nil {
-		fmt.Printf("Open() error=%v\n", err)
-		return
-	}
-	vendeur := c.Param("vendeur")
-	modele := c.Param("modele")
-	couleur := c.Param("couleur")
-	updrsp := dbproc.AddCar(Myconn, vendeur, modele, couleur)
-	fmt.Printf("update response:%v\n", updrsp)
-	render(c, gin.H{
-		"title":   "Creation of car",
-		"payload": updrsp}, "carcreate.html")
 }

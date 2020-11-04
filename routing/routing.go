@@ -7,16 +7,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SetRoutes defines de different routes for gin service
+// SetRoutes defines de different routes for gin services
 func SetRoutes() *gin.Engine {
 
 	r := gin.Default()
 	templatedir := dbproc.GetConfig("Templatesdir")
 	r.LoadHTMLGlob(templatedir)
+	// this is the first page ...equivalent to the index.html reference
 	r.GET("/", processors.Carsliste)
-	r.GET("/carlist", processors.Carsliste)
-	//	r.GET("/carparam/:clef/:valeur", processors.CarsParam)
-	r.GET("/caradd/:vendeur/:modele/:couleur", processors.CarAdd)
+	// this is he route to hanle all requests from the form (carform.html)
 	r.POST("/formcars", processors.FormCars)
 	return r
 }
