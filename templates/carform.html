@@ -11,34 +11,38 @@ Error message received:  {{ .messages }}
     <div align="right">   
         Vendor:<input type="text" name="vensel">Model: <input type="text" name="modsel"> Color: <input type="text" name="colsel"><input type="submit" name="oper" value="SELECT">
     </div><hr>
-    <div align="center">
-    <table style="width: 100%">
-        <colgroup>
-            <col span="1" style="width: 1%;">
-            <col span="1" style="width: 30%;">
-            <col span="1" style="width: 45%;">
-            <col span="1" style="width: 15%;">
-            <col span="1" style="width: 9%;">
-         </colgroup>  
-      <tr>
-        <th>Référence</th>  
-        <th>Vendor</th>
-        <th>Model</th>
-        <th>Color</th>
-        <th>Select</th>
-      </tr>
+    <table table-layout: fixed;>
+      <colgroup>
+        <col class="ten" />
+        <col class="thirty" />
+        <col class="thirty" />
+        <col class="twenty" />
+        <col class="ten" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th style="width: 100px;">Référence</th>  
+          <th style="width: 280px;">Vendor</th>
+          <th style="width: 280px;">Model</th>
+          <th style="width: 120px;">Color</th>
+          <th style="width: 50px ;">Select</th>
+        </tr>
+      </thead> 
+      <tbody >
       {{range .payload.Vehicules }}
-      <tr>
-        <td>{{.Isn}}</td> 
-        <td>{{.Vendor}}</td>
-        <td>{{.Model}}</td>
-        <td>{{.Color}}</td>
-        <td><Center><input type="radio" name="selection" value="{{.Isn}}-{{.Vendor}}-{{.Model}}-{{.Color}}"></Center></td>
-      </tr>
+        <tr>
+          <td style="width: 100px;">{{.Isn}}</td> 
+          <td style="width: 280px;">{{.Vendor}}</td>
+          <td style="width: 280px;">{{.Model}}</td>
+          <td style="width: 120px;">{{.Color}}</td>
+          <td style="width: 50px; align-content: center;"><input type="radio" name="selection" value="{{.Isn}}-{{.Vendor}}-{{.Model}}-{{.Color}}"></td>
+        </tr>
       {{end}}
+      </tbody>
     </table>
-    <hr>
     </div>
+    <hr>
+    
     <div align="left">
     <input type="submit" name="oper" value="ADD"><input type="submit" name="oper" value="UPD"><input type="submit" name="oper" value="DELETE">
     </div>

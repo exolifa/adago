@@ -1,3 +1,4 @@
+//Package dbproc contains all the procedure used to connect to ADABAS and make basic CRUD operation.
 package dbproc
 
 import (
@@ -19,8 +20,8 @@ type Carinfo struct {
 	Color  string
 }
 
-// Carrec contains data on car
-type Carrec struct {
+// carrec contains data on car
+type carrec struct {
 	Vendor string
 	Model  string
 	Color  string
@@ -32,18 +33,18 @@ type CarList struct {
 	Message   string
 }
 
-// Switchprop contains a database switching proposal
-type Switchprop struct {
+// switchprop contains a database switching proposal
+type switchprop struct {
 	Num   int    `json:"Numero"`
 	SWUrl string `json:"Url"`
 	Fnr   int    `json:"Fnr"`
 }
 
-// SwitchList contains list of mnemonic mapping
-var SwitchList map[string]*Switchprop
+// switchList contains list of mnemonic mapping
+var switchList map[string]*switchprop
 
-// Config is the structure for all globals parameters
-type Config struct {
+// config is the structure for all globals parameters
+type config struct {
 	Dbtouse       string `json:"db_to_use"`
 	Dburl         string
 	ConnectString string
@@ -55,7 +56,7 @@ type Config struct {
 }
 
 // Conf contains parameters for all modules
-var Conf Config
+var Conf config
 
 // GetConfig allows other modules to get access to parameters in config file
 func GetConfig(item string) string {
@@ -88,7 +89,7 @@ func init() {
 	_ = json.Unmarshal([]byte(fic), &Conf)
 	switcherfyle := Conf.Switcherconf
 	fichier, _ := ioutil.ReadFile(switcherfyle)
-	_ = json.Unmarshal([]byte(fichier), &SwitchList)
+	_ = json.Unmarshal([]byte(fichier), &switchList)
 	fmt.Printf("resume de l'init\n=================\n")
 	fmt.Printf("le parametre reçu:%v\n", conffyle)
 	fmt.Printf("le fichier param :%v\n", string(fic))
@@ -116,8 +117,8 @@ func result2struct(r *adabas.Response) []Carinfo {
 	return cl
 }
 
-// Adaswitch create a adabas connection string based on received value(s)
-func Adaswitch(i interface{}) {
+// adaswitch create a adabas connection string based on received value(s)
+func adaswitch(i interface{}) {
 	switch v := i.(type) {
 	case map[string]string:
 		mi := make(map[string]string)
@@ -130,16 +131,16 @@ func Adaswitch(i interface{}) {
 		Conf.Fnr = uint32(i64)
 	default:
 		clef := fmt.Sprintf("%v", i)
-		Conf.Dburl = fmt.Sprintf("%v(adatcp://%v)", SwitchList[clef].Num, SwitchList[clef].SWUrl)
-		Conf.ConnectString = fmt.Sprintf("%v,%v", Conf.Dburl, SwitchList[clef].Fnr)
-		Conf.Fnr = uint32(SwitchList[clef].Fnr)
+		Conf.Dburl = fmt.Sprintf("%v(adatcp://%v)", switchList[clef].Num, switchList[clef].SWUrl)
+		Conf.ConnectString = fmt.Sprintf("%v,%v", Conf.Dburl, switchList[clef].Fnr)
+		Conf.Fnr = uint32(switchList[clef].Fnr)
 	}
 	fmt.Printf("configuring Dburl to %v\n", Conf.Dburl)
 	fmt.Printf("configuring Dbconn to %v\n", Conf.ConnectString)
 }
 
-// LoadMyJSONMap will load the maps to the DB
-func LoadMyJSONMap(Myconn *adabas.Connection) {
+// loadMyJSONMap will load the maps to the DB
+func loadMyJSONMap(Myconn *adabas.Connection) {
 	fmt.Printf("loading map from %v into :%v\n", Conf.Mapsfile, Conf.Dburl)
 	var dburl, _ = adabas.NewURL(Conf.Dburl)
 	var maprepo = adabas.NewMapRepositoryWithURL(adabas.DatabaseURL{URL: *dburl, Fnr: adabas.Fnr(Conf.Fnr)})
@@ -165,7 +166,7 @@ func LoadMyJSONMap(Myconn *adabas.Connection) {
 
 // Adabasinit is used to initialize Adabas connection
 func Adabasinit() *adabas.Connection {
-	Adaswitch(Conf.Dbtouse)
+	adaswitch(Conf.Dbtouse)
 	// creating the connection
 	fullconn := "acj;map;config=[" + Conf.ConnectString + "]"
 	fmt.Printf("Opening connection to :%v\n", fullconn)
@@ -173,7 +174,7 @@ func Adabasinit() *adabas.Connection {
 	if err != nil {
 		fmt.Printf("NewConnection() error=%v\n", err)
 	}
-	LoadMyJSONMap(adaConnect)
+	loadMyJSONMap(adaConnect)
 	return adaConnect
 }
 
@@ -252,7 +253,7 @@ func AddCar(Myconn *adabas.Connection, vendeur string, modele string, couleur st
 	if err != nil {
 		return err.Error()
 	}
-	enreg := &Carrec{Vendor: vendeur, Model: modele, Color: couleur}
+	enreg := &carrec{Vendor: vendeur, Model: modele, Color: couleur}
 	sterr := storeRequest.StoreData(enreg)
 	if sterr != nil {
 		return sterr.Error()

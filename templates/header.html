@@ -13,10 +13,32 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     <script async src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
     <style>
-        table, th, td {
-          border: 1px solid black;
-          border-collapse: collapse;
+        table {
+            table-layout: fixed;
+            display:block;
         }
+        thead {
+            display: inline-block;
+            height: 25px;
+            width:100%;
+            
+        }
+        tbody {
+            height: 500px;
+            display: inline-block;
+            width: 100%;
+            overflow:scroll;
+        }
+       .ten {
+           width: 10%;
+       }
+       .twenty{
+           width: 20%;
+       }
+       .thirty {
+           width: 30%;
+       }
+
         hr { 
             position: relative; 
             top: 20px; 
