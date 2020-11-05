@@ -29,7 +29,7 @@ type carrec struct {
 
 // CarList is the structure to get the list of cars
 type CarList struct {
-	Vehicules []Carinfo
+	Vehicules []*Carinfo
 	Message   string
 }
 
@@ -90,16 +90,16 @@ func init() {
 	switcherfyle := Conf.Switcherconf
 	fichier, _ := ioutil.ReadFile(switcherfyle)
 	_ = json.Unmarshal([]byte(fichier), &switchList)
-	fmt.Printf("resume de l'init\n=================\n")
-	fmt.Printf("le parametre reçu:%v\n", conffyle)
-	fmt.Printf("le fichier param :%v\n", string(fic))
-	fmt.Printf("le nom du fichier switch:%v\n", switcherfyle)
-	fmt.Printf("le fichier switching:%v\n", string(fichier))
+	fmt.Printf("Init summary\n=================\n")
+	fmt.Printf("Received parameter:%v\n", conffyle)
+	fmt.Printf("Param file title :%v\n", string(fic))
+	fmt.Printf("Switch config file :%v\n", switcherfyle)
+	fmt.Printf("Switch file content:%v\n", string(fichier))
 }
 
 // result2struct transforms adabas response into array of struct to enable easy publishing in HTML templates
-func result2struct(r *adabas.Response) []Carinfo {
-	var cl []Carinfo
+func result2struct(r *adabas.Response) []*Carinfo {
+	var cl []*Carinfo
 	if r.NrRecords() > 0 {
 		for _, v := range r.Values {
 			isn := v.Isn
@@ -111,7 +111,7 @@ func result2struct(r *adabas.Response) []Carinfo {
 			voiture.Vendor = ven.String()
 			voiture.Model = mod.String()
 			voiture.Color = col.String()
-			cl = append(cl, voiture)
+			cl = append(cl, &voiture)
 		}
 	}
 	return cl
@@ -181,7 +181,7 @@ func Adabasinit() *adabas.Connection {
 // Carslist return the list of cars up to number given by limite - zero means all
 func Carslist(Myconn *adabas.Connection, limite uint64) CarList {
 	// creating Read Request with MAP
-	readRequest, cerr := Myconn.CreateMapReadRequest("VehicleMap")
+	readRequest, cerr := Myconn.CreateMapReadRequest(&Carinfo{})
 	if cerr != nil {
 		fmt.Printf("CreateMapReadRequest() error=%v\n", cerr)
 	}
@@ -197,14 +197,18 @@ func Carslist(Myconn *adabas.Connection, limite uint64) CarList {
 		fmt.Printf("ReadLogicalWith() error=%v\n", err)
 	}
 	var carlist CarList
-	carlist.Vehicules = result2struct(result)
+	//	carlist.Vehicules = result2struct(result)
+	carlist.Vehicules = make([]*Carinfo, 0)
+	for _, v := range result.Data {
+		carlist.Vehicules = append(carlist.Vehicules, v.(*Carinfo))
+	}
 	return carlist
 }
 
 // CarsSearch return the list of cars for the specified vendors
 func CarsSearch(Myconn *adabas.Connection, vv string, mv string, cv string, limite uint64) CarList {
 	// creating Read Request with MAP
-	readRequest, cerr := Myconn.CreateMapReadRequest("VehicleMap")
+	readRequest, cerr := Myconn.CreateMapReadRequest(&Carinfo{})
 	if cerr != nil {
 		fmt.Printf("CreateMapReadRequest() error=%v\n", cerr)
 	}
@@ -237,14 +241,17 @@ func CarsSearch(Myconn *adabas.Connection, vv string, mv string, cv string, limi
 		fmt.Printf("ReadLogicalWith() error=%v\n", err)
 	}
 	var carlist CarList
-	carlist.Vehicules = result2struct(result)
+	carlist.Vehicules = make([]*Carinfo, 0)
+	for _, v := range result.Data {
+		carlist.Vehicules = append(carlist.Vehicules, v.(*Carinfo))
+	}
 	return carlist
 }
 
 //AddCar tries to create a car record in the file
 func AddCar(Myconn *adabas.Connection, vendeur string, modele string, couleur string) string {
 	// creating Store Request with MAP
-	storeRequest, cerr := Myconn.CreateMapStoreRequest("VehicleMap")
+	storeRequest, cerr := Myconn.CreateMapStoreRequest(&Carinfo{})
 	if cerr != nil {
 		return cerr.Error()
 	}
@@ -267,7 +274,7 @@ func AddCar(Myconn *adabas.Connection, vendeur string, modele string, couleur st
 
 // DelCar enables user to delete a car
 func DelCar(Myconn *adabas.Connection, carisn uint64) string {
-	deleteRequest, cerr := Myconn.CreateMapDeleteRequest("VehicleMap")
+	deleteRequest, cerr := Myconn.CreateMapDeleteRequest("VehiclesMap")
 	if cerr != nil {
 		return cerr.Error()
 	}
@@ -286,7 +293,7 @@ func DelCar(Myconn *adabas.Connection, carisn uint64) string {
 //UpdateCar  enables update
 func UpdateCar(Myconn *adabas.Connection, isn uint64, vendeur string, modele string, couleur string) string {
 	// creating Read Request with MAP
-	readRequest, cerr := Myconn.CreateMapReadRequest("VehicleMap")
+	readRequest, cerr := Myconn.CreateMapReadRequest(&Carinfo{})
 	if cerr != nil {
 		return cerr.Error()
 	}
@@ -307,7 +314,7 @@ func UpdateCar(Myconn *adabas.Connection, isn uint64, vendeur string, modele str
 	enreg.SetValue("Color", couleur)
 	fmt.Printf("enreg modified:%v\n", enreg)
 	//  the mode of creation of the storeRequest must be the same than the mode of creation of the previous ReadRequest
-	storeRequest, cerr := Myconn.CreateMapStoreRequest("VehicleMap")
+	storeRequest, cerr := Myconn.CreateMapStoreRequest(&Carinfo{})
 	if cerr != nil {
 		return cerr.Error()
 	}

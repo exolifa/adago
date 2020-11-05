@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Myconn est le contenu de la connexion ADABAS
+// Myconn is the adabas connection
 var Myconn = dbproc.Adabasinit()
 
 // Render to handle all types of request (html ,json,xml
@@ -57,10 +57,13 @@ func FormCars(c *gin.Context) {
 	action := c.PostForm("oper")
 	fmt.Printf("in formcars with action=%v\n", action)
 	switch action {
+	//First 2 cases to go to dedicated screens
+	//ADD returns the empty screen to create a new vehicule
 	case "ADD":
 		render(c, gin.H{
 			"title": "Add New car",
 		}, "carcreate.html")
+		//UPD returns a prefilled screen to modify data of a vehicule
 	case "UPD":
 		cible := c.PostForm("selection")
 		s := strings.Split(cible, "-")
@@ -76,7 +79,8 @@ func FormCars(c *gin.Context) {
 		render(c, gin.H{
 			"title":   "Update car",
 			"payload": carupd}, "carupd.html")
-
+		// Now the real actions
+		// DELETE allows deletion of the car selected in the main screen
 	case "DELETE":
 		cible := c.PostForm("selection")
 		s := strings.Split(cible, "-")
@@ -89,7 +93,8 @@ func FormCars(c *gin.Context) {
 		render(c, gin.H{
 			"title":   "List of cars",
 			"payload": mycarlist}, "carform.html")
-
+		// From the ADDITION screen this will ADD the car to ADABAS
+		// The return screen show the list of cars from the vendor
 	case "CREATE":
 		vencr := c.PostForm("vencr")
 		colcr := c.PostForm("colcr")
@@ -101,6 +106,8 @@ func FormCars(c *gin.Context) {
 		render(c, gin.H{
 			"title":   "List of cars",
 			"payload": mycarlist}, "carform.html")
+		// From the UPD screen this modify the record (based on the ISN /Reference number of the car)
+		// It returns the modified record
 	case "UPDATE":
 		venup := c.PostForm("vencr")
 		colup := c.PostForm("colcr")
@@ -114,7 +121,8 @@ func FormCars(c *gin.Context) {
 		render(c, gin.H{
 			"title":   "List of cars",
 			"payload": mycarlist}, "carform.html")
-
+		// Based on the combination of the 3 criteria it,
+		// SELECT returns the car(s) complying with the combined criteria
 	case "SELECT":
 		vensel := c.PostForm("vensel")
 		modsel := c.PostForm("modsel")
@@ -125,6 +133,8 @@ func FormCars(c *gin.Context) {
 		render(c, gin.H{
 			"title":   "List of cars",
 			"payload": mycarlist}, "carform.html")
+		// In case something goes wrong, this send back to the main screen
+		//showing all cars in the database
 	default:
 		mycarlist := dbproc.Carslist(Myconn, 0)
 		render(c, gin.H{
