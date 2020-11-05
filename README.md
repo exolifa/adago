@@ -117,6 +117,6 @@ The purpose was just to demonstrate the ease of integrating ADABAS data in Go pr
 
 ## About the author
 
-I stopped writing code more than 2 decades ago. Today I still produce some "code" for my hobby mainly on ESP/Arduino platforms. 
-I discovered ADABAS because ,as part of my management assigments, I make with our former Mainframe team the long trip to move the existing Cobol/Natural/Adabas applications to Linux and now to Kubernetes.
-Our main Enterprise Architect introduced me to Golang as part of our regular marketplace's survey. I got a "click": could be because some aspects remind me of my coding experience in Algol ,long but also because the learning curve was easy. I like Golang for its powerful simplicity...  
+I stopped writing professional code more than 2 decades ago. Today I only "code" for my hobby mainly on ESP/Arduino platforms. 
+I discovered ADABAS, as part of on of my management's assigments: I walk, with our former Mainframe team, the long trip to move the existing Cobol/Natural/Adabas applications to Linux and now to Kubernetes.
+Our main Enterprise Architect introduced me to Golang as part of our regular marketplace's survey: I got a "click"! could be because some aspects remind me of my coding experience in Algol ,long ago; but also because the learning curve was easy. I like Golang for its powerful simplicity...  
