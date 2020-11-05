@@ -29,7 +29,7 @@ type carrec struct {
 
 // CarList is the structure to get the list of cars
 type CarList struct {
-	Vehicules []Carinfo
+	Vehicules []*Carinfo
 	Message   string
 }
 
@@ -98,8 +98,8 @@ func init() {
 }
 
 // result2struct transforms adabas response into array of struct to enable easy publishing in HTML templates
-func result2struct(r *adabas.Response) []Carinfo {
-	var cl []Carinfo
+func result2struct(r *adabas.Response) []*Carinfo {
+	var cl []*Carinfo
 	if r.NrRecords() > 0 {
 		for _, v := range r.Values {
 			isn := v.Isn
@@ -111,7 +111,7 @@ func result2struct(r *adabas.Response) []Carinfo {
 			voiture.Vendor = ven.String()
 			voiture.Model = mod.String()
 			voiture.Color = col.String()
-			cl = append(cl, voiture)
+			cl = append(cl, &voiture)
 		}
 	}
 	return cl
@@ -181,7 +181,7 @@ func Adabasinit() *adabas.Connection {
 // Carslist return the list of cars up to number given by limite - zero means all
 func Carslist(Myconn *adabas.Connection, limite uint64) CarList {
 	// creating Read Request with MAP
-	readRequest, cerr := Myconn.CreateMapReadRequest("VehicleMap")
+	readRequest, cerr := Myconn.CreateMapReadRequest(&Carinfo{})
 	if cerr != nil {
 		fmt.Printf("CreateMapReadRequest() error=%v\n", cerr)
 	}
@@ -197,14 +197,18 @@ func Carslist(Myconn *adabas.Connection, limite uint64) CarList {
 		fmt.Printf("ReadLogicalWith() error=%v\n", err)
 	}
 	var carlist CarList
-	carlist.Vehicules = result2struct(result)
+	//	carlist.Vehicules = result2struct(result)
+	carlist.Vehicules = make([]*Carinfo, 0)
+	for _, v := range result.Data {
+		carlist.Vehicules = append(carlist.Vehicules, v.(*Carinfo))
+	}
 	return carlist
 }
 
 // CarsSearch return the list of cars for the specified vendors
 func CarsSearch(Myconn *adabas.Connection, vv string, mv string, cv string, limite uint64) CarList {
 	// creating Read Request with MAP
-	readRequest, cerr := Myconn.CreateMapReadRequest("VehicleMap")
+	readRequest, cerr := Myconn.CreateMapReadRequest(&Carinfo{})
 	if cerr != nil {
 		fmt.Printf("CreateMapReadRequest() error=%v\n", cerr)
 	}
@@ -237,7 +241,11 @@ func CarsSearch(Myconn *adabas.Connection, vv string, mv string, cv string, limi
 		fmt.Printf("ReadLogicalWith() error=%v\n", err)
 	}
 	var carlist CarList
-	carlist.Vehicules = result2struct(result)
+	carlist.Vehicules = make([]*Carinfo, 0)
+	for _, v := range result.Data {
+		carlist.Vehicules = append(carlist.Vehicules, v.(*Carinfo))
+	}
+	//	carlist.Vehicules = result2struct(result)
 	return carlist
 }
 
